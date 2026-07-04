@@ -1,106 +1,115 @@
 package com.flowbrain.backend.project.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import jakarta.validation.Valid;
-import java.util.*;
+import org.springframework.web.bind.annotation.*;
 
 import com.flowbrain.backend.common.dto.ApiResponse;
 import com.flowbrain.backend.project.dto.CreateProjectRequest;
 import com.flowbrain.backend.project.dto.ProjectResponse;
 import com.flowbrain.backend.project.service.ProjectService;
 
+import jakarta.validation.Valid;
+
 @RestController
-@RequestMapping("/api/v1/projects")
+@RequestMapping("/api/v1")
 public class ProjectController {
 
-    private final ProjectService projectService;
+        private final ProjectService projectService;
 
-    public ProjectController(ProjectService projectService) {
-        this.projectService = projectService;
-    }
+        public ProjectController(ProjectService projectService) {
+                this.projectService = projectService;
+        }
 
-    @PostMapping
-    public ResponseEntity<ApiResponse<ProjectResponse>> createProject(
-            @Valid @RequestBody CreateProjectRequest request) {
+        // ================= CREATE PROJECT =================
 
-        ProjectResponse response = projectService.createProject(request);
+        @PostMapping("/workspaces/{workspaceId}/projects")
+        public ResponseEntity<ApiResponse<ProjectResponse>> createProject(
 
-        ApiResponse<ProjectResponse> apiResponse = new ApiResponse<>(
-                true,
-                "Project created successfully",
-                response);
+                        @PathVariable String workspaceId,
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(apiResponse);
-    }
+                        @Valid @RequestBody CreateProjectRequest request) {
 
-    @GetMapping
-    public ResponseEntity<ApiResponse<List<ProjectResponse>>> getAllProjects() {
-        List<ProjectResponse> response = projectService.getAllProjects();
+                ProjectResponse response = projectService.createProject(
+                                workspaceId,
+                                request);
 
-        ApiResponse<List<ProjectResponse>> apiResponse = new ApiResponse<>(
-                true,
-                "List of all the projects",
-                response);
+                return ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(new ApiResponse<>(
+                                                true,
+                                                "Project created successfully",
+                                                response));
+        }
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(apiResponse);
-    }
+        // ================= GET ALL PROJECTS =================
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<ProjectResponse>> getProjectById(@PathVariable String id) {
-        ProjectResponse response = projectService.getProjectById(id);
+        @GetMapping("/workspaces/{workspaceId}/projects")
+        public ResponseEntity<ApiResponse<List<ProjectResponse>>> getAllProjects(
 
-        ApiResponse<ProjectResponse> apiResponse = new ApiResponse<>(
-                true,
-                "Project found successfully",
-                response);
+                        @PathVariable String workspaceId) {
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(apiResponse);
+                List<ProjectResponse> response = projectService.getAllProjects(workspaceId);
 
-    }
+                return ResponseEntity.ok(
+                                new ApiResponse<>(
+                                                true,
+                                                "Projects fetched successfully",
+                                                response));
+        }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteProject(
-            @PathVariable String id) {
+        // ================= GET PROJECT =================
 
-        projectService.deleteProject(id);
+        @GetMapping("/projects/{projectId}")
+        public ResponseEntity<ApiResponse<ProjectResponse>> getProjectById(
 
-        ApiResponse<Void> response = new ApiResponse<>(
-                true,
-                "Project deleted successfully",
-                null);
+                        @PathVariable String projectId) {
 
-        return ResponseEntity.ok(response);
-    }
+                ProjectResponse response = projectService.getProjectById(projectId);
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<ProjectResponse>> updateProject(@PathVariable String id,
-            @Valid @RequestBody CreateProjectRequest request) {
-        ProjectResponse response = projectService.updateProject(id, request);
+                return ResponseEntity.ok(
+                                new ApiResponse<>(
+                                                true,
+                                                "Project fetched successfully",
+                                                response));
+        }
 
-        ApiResponse<ProjectResponse> apiResponse = new ApiResponse<>(
-                true,
-                "Project updated successfully",
-                response);
+        // ================= UPDATE PROJECT =================
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(apiResponse);
-    }
+        @PutMapping("/projects/{projectId}")
+        public ResponseEntity<ApiResponse<ProjectResponse>> updateProject(
+
+                        @PathVariable String projectId,
+
+                        @Valid @RequestBody CreateProjectRequest request) {
+
+                ProjectResponse response = projectService.updateProject(
+                                projectId,
+                                request);
+
+                return ResponseEntity.ok(
+                                new ApiResponse<>(
+                                                true,
+                                                "Project updated successfully",
+                                                response));
+        }
+
+        // ================= DELETE PROJECT =================
+
+        @DeleteMapping("/projects/{projectId}")
+        public ResponseEntity<ApiResponse<String>> deleteProject(
+
+                        @PathVariable String projectId) {
+
+                projectService.deleteProject(projectId);
+
+                return ResponseEntity.ok(
+                                new ApiResponse<>(
+                                                true,
+                                                "Project deleted successfully",
+                                                "Success"));
+        }
 
 }

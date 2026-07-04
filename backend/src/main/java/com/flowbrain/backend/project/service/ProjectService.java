@@ -7,13 +7,18 @@ import java.util.*;
 
 public interface ProjectService {
 
-    ProjectResponse createProject(CreateProjectRequest request);
+    ProjectResponse createProject(
+            String workspaceId,
+            CreateProjectRequest request);
 
-    List<ProjectResponse> getAllProjects();
+    List<ProjectResponse> getAllProjects(
+            String workspaceId);
 
     ProjectResponse getProjectById(String id);
 
-    void deleteProject(String id);
+    ProjectResponse updateProject(
+            String id,
+            CreateProjectRequest request);
 
-    ProjectResponse updateProject(String id, CreateProjectRequest request);
+    void deleteProject(String id);
 }

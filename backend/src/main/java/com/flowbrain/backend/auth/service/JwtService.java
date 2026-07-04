@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import com.flowbrain.backend.user.entity.User;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -15,11 +17,15 @@ import io.jsonwebtoken.security.Keys;
 @Service
 public class JwtService {
 
-    private static final String SECRET = "thisIsMyVeryLongSecretKeyForFlowBrainApplication123456789";
+@Value("${jwt.secret}")
+private String secret;
+
+@Value("${jwt.expiration}")
+private long expiration;
 
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(
-                SECRET.getBytes(StandardCharsets.UTF_8));
+                secret.getBytes(StandardCharsets.UTF_8));
     }
 
     public String generateToken(User user) {
@@ -28,7 +34,7 @@ public class JwtService {
                 .subject(user.getEmail())
                 .issuedAt(new Date())
                 .expiration(new Date(
-                        System.currentTimeMillis() + 1000L * 60 * 60 * 24))
+                        System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey())
                 .compact();
     }

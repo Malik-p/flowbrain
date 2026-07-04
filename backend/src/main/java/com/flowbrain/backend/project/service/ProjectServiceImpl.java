@@ -1,85 +1,128 @@
 package com.flowbrain.backend.project.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.flowbrain.backend.common.CurrentUserService;
 import com.flowbrain.backend.project.dto.CreateProjectRequest;
 import com.flowbrain.backend.project.dto.ProjectResponse;
 import com.flowbrain.backend.project.entity.Project;
+import com.flowbrain.backend.project.mapper.ProjectMapper;
 import com.flowbrain.backend.project.repository.ProjectRepository;
-
-import java.time.LocalDateTime;
-import java.util.*;
-
-import org.springframework.stereotype.Service;
+import com.flowbrain.backend.user.entity.User;
+import com.flowbrain.backend.workspace.entity.Workspace;
+import com.flowbrain.backend.workspace.repository.WorkspaceRepository;
+import com.flowbrain.backend.common.AuthorizationService;
+import com.flowbrain.backend.common.exception.ResourceNotFoundException;
 
 @Service
 public class ProjectServiceImpl implements ProjectService {
 
-    private final ProjectRepository projectRepository;
+        private final ProjectRepository projectRepository;
+        private final WorkspaceRepository workspaceRepository;
+        private final CurrentUserService currentUserService;
+        private final AuthorizationService authorizationService;
 
-    public ProjectServiceImpl(ProjectRepository projectRepository) {
-        this.projectRepository = projectRepository;
-    }
+        public ProjectServiceImpl(
+                        ProjectRepository projectRepository,
+                        WorkspaceRepository workspaceRepository,
+                        CurrentUserService currentUserService, AuthorizationService authorizationService) {
 
-    private ProjectResponse mapToResponse(Project project) {
+                this.projectRepository = projectRepository;
+                this.workspaceRepository = workspaceRepository;
+                this.currentUserService = currentUserService;
+                this.authorizationService = authorizationService;
+        }
 
-        ProjectResponse response = new ProjectResponse();
+        @Override
+        public ProjectResponse createProject(
+                        String workspaceId,
+                        CreateProjectRequest request) {
 
-        response.setId(project.getId());
-        response.setName(project.getName());
-        response.setDescription(project.getDescription());
-        response.setColor(project.getColor());
-        response.setCreatedAt(project.getCreatedAt());
+                User currentUser = currentUserService.getCurrentUser();
 
-        return response;
-    }
+                Workspace workspace = workspaceRepository
+                                .findById(workspaceId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Workspace not found"));
 
-    @Override
-    public ProjectResponse createProject(CreateProjectRequest request) {
+                authorizationService.validateWorkspaceMember(workspace);
 
-        Project project = new Project();
+                Project project = new Project();
 
-        project.setName(request.getName());
-        project.setDescription(request.getDescription());
-        project.setColor(request.getColor());
-        project.setCreatedAt(LocalDateTime.now());
+                project.setName(request.getName());
+                project.setDescription(request.getDescription());
+                project.setColor(request.getColor());
 
-        Project savedProject = projectRepository.save(project);
+                project.setWorkspace(workspace);
+                project.setCreatedBy(currentUser);
+                project.setCreatedAt(LocalDateTime.now());
 
-        return mapToResponse(savedProject);
+                Project savedProject = projectRepository.save(project);
 
-    }
+                return ProjectMapper.toResponse(savedProject);
+        }
 
-    @Override
-    public List<ProjectResponse> getAllProjects() {
-        return projectRepository.findAll()
-                .stream()
-                .map(this::mapToResponse)
-                .toList();
-    }
+        @Override
+        public List<ProjectResponse> getAllProjects(
+                        String workspaceId) {
 
-    @Override
-    public ProjectResponse getProjectById(String id) {
-        Project project = projectRepository.findById(id).orElseThrow(() -> new RuntimeException("Project not found"));
+                User currentUser = currentUserService.getCurrentUser();
 
-        return mapToResponse(project);
-    }
+                Workspace workspace = workspaceRepository
+                                .findById(workspaceId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Workspace not found"));
 
-    @Override
-    public void deleteProject(String id) {
-        projectRepository.deleteById(id);
-    }
+                authorizationService.validateWorkspaceMember(workspace);
 
-    @Override
-    public ProjectResponse updateProject(String id, CreateProjectRequest request) {
+                return projectRepository
+                                .findByWorkspaceId(workspaceId)
+                                .stream()
+                                .map(ProjectMapper::toResponse)
+                                .toList();
+        }
 
-        Project project = projectRepository.findById(id).orElseThrow(() -> new RuntimeException("Project not found"));
+        @Override
+        public ProjectResponse getProjectById(String id) {
 
-        project.setName(request.getName());
-        project.setDescription(request.getDescription());
-        project.setColor(request.getColor());
+                Project project = projectRepository
+                                .findById(id)
+                                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
 
-        Project updateProject = projectRepository.save(project);
+                return ProjectMapper.toResponse(project);
+        }
 
-        return mapToResponse(updateProject);
-    }
+        @Override
+        public ProjectResponse updateProject(
+                        String id,
+                        CreateProjectRequest request) {
 
+                Project project = projectRepository
+                                .findById(id)
+                                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+
+                project.setName(request.getName());
+                project.setDescription(request.getDescription());
+                project.setColor(request.getColor());
+
+                authorizationService.validateWorkspaceOwner(
+                                project.getWorkspace());
+
+                Project savedProject = projectRepository.save(project);
+
+                return ProjectMapper.toResponse(savedProject);
+        }
+
+        @Override
+        public void deleteProject(String id) {
+
+                Project project = projectRepository
+                                .findById(id)
+                                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+
+                authorizationService.validateWorkspaceOwner(
+                                project.getWorkspace());
+                projectRepository.delete(project);
+        }
 }

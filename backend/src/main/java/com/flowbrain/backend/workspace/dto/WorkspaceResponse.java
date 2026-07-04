@@ -1,23 +1,14 @@
-package com.flowbrain.backend.project.dto;
+package com.flowbrain.backend.workspace.dto;
 
 import java.time.LocalDateTime;
 
-public class ProjectResponse {
+public class WorkspaceResponse {
 
     private String id;
-
     private String name;
-
     private String description;
-
-    private String color;
-
-    private String workspaceName;
-
-    private String createdBy;
-
+    private String ownerName;
     private Integer totalMembers;
-
     private LocalDateTime createdAt;
 
     public String getId() {
@@ -44,28 +35,12 @@ public class ProjectResponse {
         this.description = description;
     }
 
-    public String getColor() {
-        return color;
+    public String getOwnerName() {
+        return ownerName;
     }
 
-    public void setColor(String color) {
-        this.color = color;
-    }
-
-    public String getWorkspaceName() {
-        return workspaceName;
-    }
-
-    public void setWorkspaceName(String workspaceName) {
-        this.workspaceName = workspaceName;
-    }
-
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
     }
 
     public Integer getTotalMembers() {
@@ -83,6 +58,5 @@ public class ProjectResponse {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
-
 
 }

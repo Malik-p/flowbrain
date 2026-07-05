@@ -68,4 +68,84 @@ public class AIContextBuilder {
         return context.toString();
     }
 
+    public String buildSprintContext(String workspaceId) {
+
+        Workspace workspace = workspaceRepository
+                .findById(workspaceId)
+                .orElseThrow(() -> new RuntimeException("Workspace not found"));
+
+        List<Project> projects = projectRepository.findByWorkspaceId(workspaceId);
+
+        List<Task> tasks = taskRepository.findByWorkspaceId(workspaceId);
+
+        StringBuilder context = new StringBuilder();
+
+        context.append("Workspace : ")
+                .append(workspace.getName())
+                .append("\n\n");
+
+        context.append("Projects:\n");
+
+        for (Project project : projects) {
+
+            context.append("- ")
+                    .append(project.getName())
+                    .append("\n");
+        }
+
+        context.append("\nTasks:\n");
+
+        for (Task task : tasks) {
+
+            context.append("- ")
+                    .append(task.getTitle())
+                    .append(" | ")
+                    .append(task.getStatus())
+                    .append(" | ")
+                    .append(task.getPriority())
+                    .append("\n");
+        }
+
+        return context.toString();
+    }
+
+    public String buildHealthContext(String workspaceId) {
+
+        List<Task> tasks = taskRepository.findByWorkspaceId(workspaceId);
+
+        long completed = tasks.stream()
+                .filter(task -> task.getStatus().name().equals("DONE"))
+                .count();
+
+        long inProgress = tasks.stream()
+                .filter(task -> task.getStatus().name().equals("IN_PROGRESS"))
+                .count();
+
+        long todo = tasks.stream()
+                .filter(task -> task.getStatus().name().equals("TODO"))
+                .count();
+
+        long highPriority = tasks.stream()
+                .filter(task -> task.getPriority().name().equals("HIGH"))
+                .count();
+
+        StringBuilder context = new StringBuilder();
+
+        context.append("Completed : ").append(completed).append("\n");
+        context.append("In Progress : ").append(inProgress).append("\n");
+        context.append("Todo : ").append(todo).append("\n");
+        context.append("High Priority : ").append(highPriority).append("\n\n");
+
+        for (Task task : tasks) {
+
+            context.append(task.getTitle())
+                    .append(" | ")
+                    .append(task.getStatus())
+                    .append(" | ")
+                    .append(task.getPriority())
+                    .append("\n");
+        }
+
+        return context.toString();
+    }
 }

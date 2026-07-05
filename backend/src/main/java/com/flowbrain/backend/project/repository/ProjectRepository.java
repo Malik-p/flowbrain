@@ -10,4 +10,5 @@ public interface ProjectRepository extends MongoRepository<Project, String> {
 
     List<Project> findByWorkspaceId(String workspaceId);
 
+    long countByCreatedBy_Id(String userId);
 }

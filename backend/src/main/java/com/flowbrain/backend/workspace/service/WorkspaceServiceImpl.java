@@ -19,6 +19,8 @@ import com.flowbrain.backend.workspace.repository.WorkspaceRepository;
 import com.flowbrain.backend.common.AuthorizationService;
 import com.flowbrain.backend.common.exception.BadRequestException;
 import com.flowbrain.backend.common.exception.ResourceNotFoundException;
+import com.flowbrain.backend.notification.enums.NotificationType;
+import com.flowbrain.backend.notification.service.NotificationService;
 
 @Service
 public class WorkspaceServiceImpl implements WorkspaceService {
@@ -27,16 +29,18 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         private final CurrentUserService currentUserService;
         private final UserRepository userRepository;
         private final AuthorizationService authorizationService;
+        private final NotificationService notificationService;
 
         public WorkspaceServiceImpl(
                         WorkspaceRepository workspaceRepository,
                         CurrentUserService currentUserService, UserRepository userRepository,
-                        AuthorizationService authorizationService) {
+                        AuthorizationService authorizationService, NotificationService notificationService) {
 
                 this.workspaceRepository = workspaceRepository;
                 this.currentUserService = currentUserService;
                 this.userRepository = userRepository;
                 this.authorizationService = authorizationService;
+                this.notificationService = notificationService;
         }
 
         @Override
@@ -146,6 +150,13 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                 workspace.getMembers().add(member);
 
                 Workspace savedWorkspace = workspaceRepository.save(workspace);
+
+                notificationService.createNotification(
+                                member,
+                                "Workspace Invitation",
+                                "You have been added to workspace "
+                                                + workspace.getName(),
+                                NotificationType.WORKSPACE_INVITE);
 
                 return WorkspaceMapper.toResponse(savedWorkspace);
         }

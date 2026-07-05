@@ -21,6 +21,8 @@ import com.flowbrain.backend.workspace.entity.Workspace;
 import com.flowbrain.backend.workspace.repository.WorkspaceRepository;
 import com.flowbrain.backend.common.AuthorizationService;
 import com.flowbrain.backend.common.exception.ResourceNotFoundException;
+import com.flowbrain.backend.notification.enums.NotificationType;
+import com.flowbrain.backend.notification.service.NotificationService;
 
 @Service
 public class TaskServiceImpl implements TaskService {
@@ -31,13 +33,15 @@ public class TaskServiceImpl implements TaskService {
     private final UserRepository userRepository;
     private final CurrentUserService currentUserService;
     private final AuthorizationService authorizationService;
+    private final NotificationService notificationService;
 
     public TaskServiceImpl(
             TaskRepository taskRepository,
             ProjectRepository projectRepository,
             WorkspaceRepository workspaceRepository,
             UserRepository userRepository,
-            CurrentUserService currentUserService, AuthorizationService authorizationService) {
+            CurrentUserService currentUserService, AuthorizationService authorizationService,
+            NotificationService notificationService) {
 
         this.taskRepository = taskRepository;
         this.projectRepository = projectRepository;
@@ -45,6 +49,7 @@ public class TaskServiceImpl implements TaskService {
         this.userRepository = userRepository;
         this.currentUserService = currentUserService;
         this.authorizationService = authorizationService;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -93,6 +98,13 @@ public class TaskServiceImpl implements TaskService {
         task.setUpdatedAt(LocalDateTime.now());
 
         Task savedTask = taskRepository.save(task);
+
+        notificationService.createNotification(
+                assignedUser,
+                "New Task Assigned",
+                "You have been assigned task : "
+                        + task.getTitle(),
+                NotificationType.TASK_ASSIGNED);
 
         return TaskMapper.toResponse(savedTask);
     }

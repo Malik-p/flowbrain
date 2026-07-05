@@ -9,5 +9,7 @@ import com.flowbrain.backend.workspace.entity.Workspace;
 public interface WorkspaceRepository extends MongoRepository<Workspace, String> {
 
     List<Workspace> findByMembers_Id(String userId);
+
+    long countByMembers_Id(String userId);
     
 }

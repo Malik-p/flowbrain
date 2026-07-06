@@ -11,10 +11,12 @@ import com.flowbrain.backend.user.entity.User;
 import com.flowbrain.backend.user.repository.UserRepository;
 import com.flowbrain.backend.workspace.dto.CreateWorkspaceRequest;
 import com.flowbrain.backend.workspace.dto.InviteMemberRequest;
+import com.flowbrain.backend.workspace.dto.MemberResponse;
 import com.flowbrain.backend.workspace.dto.WorkspaceResponse;
 import com.flowbrain.backend.workspace.entity.Workspace;
 import com.flowbrain.backend.workspace.mapper.WorkspaceMapper;
 import com.flowbrain.backend.workspace.repository.WorkspaceRepository;
+import com.flowbrain.backend.workspace.dto.MemberResponse;
 
 import com.flowbrain.backend.common.AuthorizationService;
 import com.flowbrain.backend.common.exception.BadRequestException;
@@ -160,5 +162,25 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
                 return WorkspaceMapper.toResponse(savedWorkspace);
         }
+
+        @Override
+public List<MemberResponse> getWorkspaceMembers(String workspaceId) {
+
+    Workspace workspace = workspaceRepository
+            .findById(workspaceId)
+            .orElseThrow(() ->
+                    new ResourceNotFoundException("Workspace not found"));
+
+    authorizationService.validateWorkspaceMember(workspace);
+
+    return workspace.getMembers()
+            .stream()
+            .map(user -> new MemberResponse(
+                    user.getId(),
+                    user.getName(),
+                    user.getEmail(),
+                    user.getRole().name()))
+            .toList();
+}
 
 }

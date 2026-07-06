@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.flowbrain.backend.workspace.dto.MemberResponse;
 
 import com.flowbrain.backend.common.dto.ApiResponse;
 import com.flowbrain.backend.workspace.dto.CreateWorkspaceRequest;
@@ -118,5 +119,24 @@ public class WorkspaceController {
                                                 "Workspace deleted successfully",
                                                 "Success"));
         }
+
+        @GetMapping("/{workspaceId}/members")
+public ResponseEntity<ApiResponse<List<MemberResponse>>> getWorkspaceMembers(
+
+        @PathVariable String workspaceId) {
+
+    List<MemberResponse> response =
+            workspaceService.getWorkspaceMembers(workspaceId);
+
+    return ResponseEntity.ok(
+
+            new ApiResponse<>(
+
+                    true,
+
+                    "Members fetched successfully",
+
+                    response));
+}
 
 }

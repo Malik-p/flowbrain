@@ -15,6 +15,7 @@ import SettingsPage from "@/pages/settings/SettingsPage";
 import AppInitializer from "@/routes/AppInitializer";
 import CreateWorkspacePage from "@/pages/onboarding/CreateWorkspacePage";
 import ProtectedRoute from "@/routes/ProtectedRoute";
+import MembersPage from "@/pages/member/MembersPage";
 
 export default function AppRoutes() {
 
@@ -112,6 +113,24 @@ export default function AppRoutes() {
 
           }
 
+        />
+
+        <Route
+          path="/members"
+          element={
+            <ProtectedRoute>
+              <MembersPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/create-workspace"
+          element={
+            <ProtectedRoute>
+              <CreateWorkspacePage />
+            </ProtectedRoute>
+          }
         />
 
       </Routes>

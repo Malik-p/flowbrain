@@ -1,7 +1,11 @@
 import {
+
     useQuery,
+
     useMutation,
+
     useQueryClient
+
 } from "@tanstack/react-query";
 
 import * as notificationService from "@/services/notificationService";
@@ -24,7 +28,9 @@ export function useUnreadCount(){
 
         queryKey:["notification-count"],
 
-        queryFn:notificationService.getUnreadCount
+        queryFn:notificationService.getUnreadCount,
+
+        refetchInterval:5000
 
     });
 
@@ -32,7 +38,7 @@ export function useUnreadCount(){
 
 export function useMarkAsRead(){
 
-    const queryClient=useQueryClient();
+    const qc=useQueryClient();
 
     return useMutation({
 
@@ -40,13 +46,13 @@ export function useMarkAsRead(){
 
         onSuccess:()=>{
 
-            queryClient.invalidateQueries({
+            qc.invalidateQueries({
 
                 queryKey:["notifications"]
 
             });
 
-            queryClient.invalidateQueries({
+            qc.invalidateQueries({
 
                 queryKey:["notification-count"]
 

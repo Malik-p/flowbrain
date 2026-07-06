@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { motion } from "framer-motion";
+import { Users } from "lucide-react";
 
 const menus = [
   {
@@ -20,6 +21,11 @@ const menus = [
     title: "Projects",
     path: "/projects",
     icon: FolderKanban,
+  },
+  {
+    title: "Members",
+    path: "/members",
+    icon: Users,
   },
   {
     title: "Tasks",
@@ -66,31 +72,31 @@ export default function Sidebar() {
 
       <nav className="flex-1 px-4 space-y-2">
 
-        {menus.map((item)=>{
+        {menus.map((item) => {
 
-          const Icon=item.icon;
+          const Icon = item.icon;
 
-          return(
+          return (
 
             <NavLink
               key={item.title}
               to={item.path}
-              className={({isActive})=>
+              className={({ isActive }) =>
 
                 `flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300
 
                 ${isActive
 
-                ?'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg'
+                  ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg'
 
-                :'text-slate-400 hover:bg-[#1B1B28] hover:text-white'
+                  : 'text-slate-400 hover:bg-[#1B1B28] hover:text-white'
 
                 }`
 
               }
             >
 
-              <Icon size={21}/>
+              <Icon size={21} />
 
               <span>{item.title}</span>
 
@@ -106,7 +112,7 @@ export default function Sidebar() {
 
         <button className="w-full rounded-2xl py-4 flex items-center justify-center gap-3 bg-red-500/10 hover:bg-red-500/20 text-red-400">
 
-          <LogOut size={20}/>
+          <LogOut size={20} />
 
           Logout
 

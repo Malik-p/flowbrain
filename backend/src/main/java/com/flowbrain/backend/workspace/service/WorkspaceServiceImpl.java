@@ -164,23 +164,29 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         }
 
         @Override
-public List<MemberResponse> getWorkspaceMembers(String workspaceId) {
+        public List<MemberResponse> getWorkspaceMembers(String workspaceId) {
 
-    Workspace workspace = workspaceRepository
-            .findById(workspaceId)
-            .orElseThrow(() ->
-                    new ResourceNotFoundException("Workspace not found"));
+                Workspace workspace = workspaceRepository
+                                .findById(workspaceId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Workspace not found"));
 
-    authorizationService.validateWorkspaceMember(workspace);
+                authorizationService.validateWorkspaceMember(workspace);
 
-    return workspace.getMembers()
-            .stream()
-            .map(user -> new MemberResponse(
-                    user.getId(),
-                    user.getName(),
-                    user.getEmail(),
-                    user.getRole().name()))
-            .toList();
-}
+                return workspace.getMembers()
+                                .stream()
+                                .map(member -> {
+
+                                        MemberResponse response = new MemberResponse();
+
+                                        response.setId(member.getId());
+                                        response.setName(member.getName());
+                                        response.setEmail(member.getEmail());
+                                        response.setRole(member.getRole().name());
+
+                                        return response;
+
+                                })
+                                .toList();
+        }
 
 }

@@ -121,22 +121,26 @@ public class WorkspaceController {
         }
 
         @GetMapping("/{workspaceId}/members")
-public ResponseEntity<ApiResponse<List<MemberResponse>>> getWorkspaceMembers(
+        public ResponseEntity<ApiResponse<List<MemberResponse>>> getWorkspaceMembers(
 
-        @PathVariable String workspaceId) {
+                        @PathVariable String workspaceId) {
 
-    List<MemberResponse> response =
-            workspaceService.getWorkspaceMembers(workspaceId);
+                List<MemberResponse> response = workspaceService.getWorkspaceMembers(workspaceId);
 
-    return ResponseEntity.ok(
+                return ResponseEntity.ok(
 
-            new ApiResponse<>(
+                                new ApiResponse<>(
 
-                    true,
+                                                true,
 
-                    "Members fetched successfully",
+                                                "Members fetched successfully",
 
-                    response));
-}
+                                                response
+
+                                )
+
+                );
+
+        }
 
 }

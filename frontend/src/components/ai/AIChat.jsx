@@ -1,61 +1,121 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { MessageCircle } from "lucide-react";
 import { useChat } from "@/hooks/useAI";
 
 export default function AIChat() {
 
-  const workspace = JSON.parse(localStorage.getItem("workspace"));
+    const [prompt, setPrompt] = useState("");
 
-  const [prompt, setPrompt] = useState("");
-  const [answer, setAnswer] = useState("");
+    const [answer, setAnswer] = useState("");
 
-  const { mutate, isPending } = useChat();
+    const { mutate, isPending } = useChat();
 
-  function send() {
+    function send() {
 
-    mutate(
-      {
-        workspaceId: workspace.id,
-        prompt,
-      },
-      {
-        onSuccess: (res) => {
-          setAnswer(res.data.answer);
-        },
-      }
-    );
-  }
+        if (!prompt.trim()) return;
 
-  return (
-    <div className="rounded-3xl bg-[#171722] border border-[#262638] p-6">
+        mutate(
 
-      <h2 className="text-2xl font-bold mb-6">
+            {
 
-        AI Chat
+                prompt
 
-      </h2>
+            },
 
-      <Input
-        value={prompt}
-        onChange={(e) => setPrompt(e.target.value)}
-        placeholder="Ask FlowBrain AI..."
-      />
+            {
 
-      <Button
-        className="mt-4"
-        onClick={send}
-        disabled={isPending}
-      >
-        {isPending ? "Thinking..." : "Send"}
-      </Button>
+                onSuccess: (res) => {
 
-      {answer && (
-        <div className="mt-8 rounded-xl bg-[#0F0F16] p-5 border border-[#2A2A3D] whitespace-pre-wrap">
-          {answer}
+                    setAnswer(
+
+                        res.data.response ||
+
+                        res.data.answer ||
+
+                        res.data.message ||
+
+                        ""
+
+                    );
+
+                }
+
+            }
+
+        );
+
+    }
+
+    return (
+
+        <div className="rounded-3xl bg-[#171722] border border-[#262638] p-8">
+
+            <div className="flex items-center gap-3">
+
+                <MessageCircle className="text-violet-400"/>
+
+                <h2 className="text-2xl font-bold">
+
+                    AI Chat
+
+                </h2>
+
+            </div>
+
+            <Input
+
+                className="mt-6"
+
+                placeholder="Ask anything about your workspace..."
+
+                value={prompt}
+
+                onChange={(e)=>setPrompt(e.target.value)}
+
+            />
+
+            <Button
+
+                className="mt-5 bg-violet-600"
+
+                onClick={send}
+
+                disabled={isPending}
+
+            >
+
+                {
+
+                    isPending
+
+                    ?
+
+                    "Thinking..."
+
+                    :
+
+                    "Ask AI"
+
+                }
+
+            </Button>
+
+            {
+
+                answer &&
+
+                <div className="mt-8 rounded-2xl border border-[#2F2F45] bg-[#101018] p-6 whitespace-pre-wrap">
+
+                    {answer}
+
+                </div>
+
+            }
+
         </div>
-      )}
 
-    </div>
-  );
+    );
+
 }

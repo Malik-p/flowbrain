@@ -1,59 +1,81 @@
-import { Button } from "@/components/ui/button";
-import { useMarkAsRead } from "@/hooks/useNotification";
-import { toast } from "sonner";
+import MainLayout from "@/components/layout/MainLayout";
+import NotificationCard from "@/components/notification/NotificationCard";
+import { useNotifications } from "@/hooks/useNotification";
 
-export default function NotificationCard({notification}){
+export default function NotificationPage() {
 
-    const {mutate}=useMarkAsRead();
+    const { data, isLoading } = useNotifications();
 
-    function markRead(){
+    if (isLoading) {
 
-        mutate(notification.id,{
+        return (
 
-            onSuccess:(res)=>{
+            <MainLayout>
 
-                toast.success(res.message);
+                <div className="text-xl">
 
-            }
+                    Loading Notifications...
 
-        });
+                </div>
+
+            </MainLayout>
+
+        );
 
     }
 
-    return(
+    const notifications = data?.data || [];
 
-        <div className="rounded-2xl bg-[#171722] border border-[#262638] p-5">
+    return (
 
-            <h2 className="font-semibold">
+        <MainLayout>
 
-                {notification.title}
+            <h1 className="text-4xl font-bold">
 
-            </h2>
+                Notifications
 
-            <p className="text-slate-400 mt-2">
+            </h1>
 
-                {notification.message}
+            <div className="space-y-5 mt-8">
 
-            </p>
+                {
 
-            {!notification.read && (
+                    notifications.length === 0 ?
 
-                <Button
+                        (
 
-                    className="mt-5"
+                            <div className="rounded-3xl border border-dashed border-[#33334A] p-12 text-center text-slate-400">
 
-                    onClick={markRead}
+                                No Notifications Yet
 
-                >
+                            </div>
 
-                    Mark as Read
+                        )
 
-                </Button>
+                        :
 
-            )}
+                        (
 
-        </div>
+                            notifications.map(notification => (
 
-    )
+                                <NotificationCard
+
+                                    key={notification.id}
+
+                                    notification={notification}
+
+                                />
+
+                            ))
+
+                        )
+
+                }
+
+            </div>
+
+        </MainLayout>
+
+    );
 
 }

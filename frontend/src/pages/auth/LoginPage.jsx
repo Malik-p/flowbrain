@@ -27,77 +27,74 @@ export default function LoginPage() {
 
     const handleLogin = () => {
 
-    mutate(form, {
+        mutate(form, {
 
-        onSuccess: async (res) => {
+            onSuccess: async (res) => {
 
-            console.log("Login Response:", res);
+                const loginData = res.data;
 
-            // Backend response = { success, message, data }
+                localStorage.setItem(
+                    "token",
+                    loginData.token
+                );
 
-            const loginData = res.data;
+                localStorage.setItem(
+                    "user",
+                    JSON.stringify({
+                        name: loginData.name,
+                        email: loginData.email,
+                        role: loginData.role
+                    })
+                );
 
-            localStorage.setItem(
-                "token",
-                loginData.token
-            );
+                try {
 
-            localStorage.setItem(
-                "user",
-                JSON.stringify({
-                    name: loginData.name,
-                    email: loginData.email,
-                    role: loginData.role
-                })
-            );
+                    const workspaceResponse = await getWorkspaces();
 
-            try {
+                    if (workspaceResponse.data.length === 0) {
 
-                const workspaceResponse = await getWorkspaces();
+                        navigate("/create-workspace");
 
-                console.log("Workspace Response:", workspaceResponse);
+                        return;
 
-                if (
-                    workspaceResponse.data &&
-                    workspaceResponse.data.length > 0
-                ) {
+                    }
 
                     localStorage.setItem(
                         "workspace",
                         JSON.stringify(workspaceResponse.data[0])
                     );
 
+                    toast.success(res.message);
+
+                    navigate("/app");
+
+                } catch (err) {
+
+                    console.error(err);
+
+                    toast.error("Unable to load workspace");
+
                 }
 
-            } catch (e) {
+            },
 
-                console.error(e);
+            onError: (err) => {
+
+                console.error(err);
+
+                toast.error(
+
+                    err.response?.data?.message ||
+
+                    "Login Failed"
+
+                );
 
             }
 
-            toast.success(res.message);
+        });
 
-           navigate("/app");
-
-        },
-
-        onError: (err) => {
-
-            console.error(err);
-
-            toast.error(
-
-                err.response?.data?.message ||
-
-                "Login Failed"
-
-            );
-
-        }
-
-    });
-
-};
+    };
 
     return (
 

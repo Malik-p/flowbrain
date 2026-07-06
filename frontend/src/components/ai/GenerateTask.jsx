@@ -1,23 +1,20 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Sparkles } from "lucide-react";
 import { useGenerateTask } from "@/hooks/useAI";
 
 export default function GenerateTask() {
 
-    const workspace = JSON.parse(
-        localStorage.getItem("workspace")
-    );
+    const [prompt, setPrompt] = useState("");
 
-    const [prompt,setPrompt]=useState("");
+    const { mutate, isPending, data } = useGenerateTask();
 
-    const {mutate,isPending,data}=useGenerateTask();
+    function generate() {
 
-    function generate(){
+        if (!prompt.trim()) return;
 
         mutate({
-
-            workspaceId:workspace.id,
 
             prompt
 
@@ -25,21 +22,29 @@ export default function GenerateTask() {
 
     }
 
-    return(
+    const tasks = data?.data?.tasks || [];
 
-        <div className="rounded-3xl bg-[#171722] border border-[#262638] p-6">
+    return (
 
-            <h2 className="text-2xl font-bold">
+        <div className="rounded-3xl bg-[#171722] border border-[#262638] p-8">
 
-                AI Task Generator
+            <div className="flex items-center gap-3">
 
-            </h2>
+                <Sparkles className="text-violet-400"/>
+
+                <h2 className="text-2xl font-bold">
+
+                    AI Task Generator
+
+                </h2>
+
+            </div>
 
             <Input
 
                 className="mt-6"
 
-                placeholder="Example : Build Authentication Module"
+                placeholder="Example: Build Authentication Module"
 
                 value={prompt}
 
@@ -49,7 +54,7 @@ export default function GenerateTask() {
 
             <Button
 
-                className="mt-5"
+                className="mt-5 bg-violet-600"
 
                 onClick={generate}
 
@@ -57,43 +62,61 @@ export default function GenerateTask() {
 
             >
 
-                {isPending
+                {
 
-                ?"Generating..."
+                    isPending
 
-                :"Generate"}
+                    ?
+
+                    "Generating..."
+
+                    :
+
+                    "Generate Tasks"
+
+                }
 
             </Button>
 
-            <div className="mt-8 space-y-4">
+            {
 
-                {data?.data?.tasks?.map((task,index)=>(
+                tasks.length>0 &&
 
-                    <div
+                <div className="mt-8 space-y-4">
 
-                        key={index}
+                    {
 
-                        className="rounded-xl bg-[#101018] p-5 border border-[#303040]"
+                        tasks.map((task,index)=>(
 
-                    >
+                            <div
 
-                        <h3 className="font-bold">
+                                key={index}
 
-                            {task.title}
+                                className="rounded-2xl bg-[#101018] border border-[#2F2F45] p-5"
 
-                        </h3>
+                            >
 
-                        <p className="text-slate-400 mt-2">
+                                <h3 className="font-bold text-lg">
 
-                            {task.description}
+                                    {task.title}
 
-                        </p>
+                                </h3>
 
-                    </div>
+                                <p className="text-slate-400 mt-2">
 
-                ))}
+                                    {task.description}
 
-            </div>
+                                </p>
+
+                            </div>
+
+                        ))
+
+                    }
+
+                </div>
+
+            }
 
         </div>
 

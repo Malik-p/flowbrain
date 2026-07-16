@@ -50,6 +50,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
                 User currentUser = currentUserService.getCurrentUser();
 
+                // User can belong to only one workspace
+                if (workspaceRepository.countByMembers_Id(currentUser.getId()) > 0) {
+                        throw new BadRequestException(
+                                        "You already belong to a workspace");
+                }
+
                 Workspace workspace = new Workspace();
 
                 workspace.setName(request.getName());
@@ -85,6 +91,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                 Workspace workspace = workspaceRepository
                                 .findById(id)
                                 .orElseThrow(() -> new ResourceNotFoundException("Workspace not found"));
+
+                // Only members of this workspace can access it
+                authorizationService.validateWorkspaceMember(workspace);
 
                 return WorkspaceMapper.toResponse(workspace);
         }
@@ -125,39 +134,62 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                         String workspaceId,
                         InviteMemberRequest request) {
 
-                Workspace workspace = workspaceRepository.findById(workspaceId)
+                User currentUser = currentUserService.getCurrentUser();
+
+                Workspace workspace = workspaceRepository
+                                .findById(workspaceId)
                                 .orElseThrow(() -> new ResourceNotFoundException("Workspace not found"));
 
+                // Only owner can invite members
                 authorizationService.validateWorkspaceOwner(workspace);
 
-                System.out.println("Request Email = " + request.getEmail());
-
-                System.out.println("Repository Result = " +
-                                userRepository.findByEmail(request.getEmail()));
-
+                // User must already be registered
                 User member = userRepository
                                 .findByEmail(request.getEmail())
-                                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                                .orElseThrow(() -> new BadRequestException(
+                                                "User must register before being invited"));
 
-                boolean alreadyMember = workspace
-                                .getMembers()
+                // Owner cannot invite himself
+                if (member.getId().equals(currentUser.getId())) {
+
+                        throw new BadRequestException(
+                                        "You cannot invite yourself");
+
+                }
+
+                // User can belong to only one workspace
+                long workspaceCount = workspaceRepository.countByMembers_Id(
+                                member.getId());
+
+                if (workspaceCount > 0) {
+
+                        throw new BadRequestException(
+                                        "User already belongs to another workspace");
+
+                }
+
+                // Extra safety check
+                boolean alreadyMember = workspace.getMembers()
                                 .stream()
                                 .anyMatch(user -> user.getId().equals(member.getId()));
 
                 if (alreadyMember) {
+
                         throw new BadRequestException(
                                         "User is already a member");
+
                 }
 
+                // Add member
                 workspace.getMembers().add(member);
 
                 Workspace savedWorkspace = workspaceRepository.save(workspace);
 
+                // Create notification
                 notificationService.createNotification(
                                 member,
                                 "Workspace Invitation",
-                                "You have been added to workspace "
-                                                + workspace.getName(),
+                                "You have been added to workspace " + workspace.getName(),
                                 NotificationType.WORKSPACE_INVITE);
 
                 return WorkspaceMapper.toResponse(savedWorkspace);

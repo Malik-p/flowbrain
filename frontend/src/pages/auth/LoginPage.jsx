@@ -41,6 +41,7 @@ export default function LoginPage() {
                 localStorage.setItem(
                     "user",
                     JSON.stringify({
+                        id: loginData.id,
                         name: loginData.name,
                         email: loginData.email,
                         role: loginData.role
@@ -51,7 +52,16 @@ export default function LoginPage() {
 
                     const workspaceResponse = await getWorkspaces();
 
-                    if (workspaceResponse.data.length === 0) {
+                    const workspaces = workspaceResponse.data || [];
+
+                    // Remove old workspace before setting a new one
+                    localStorage.removeItem("workspace");
+
+                    if (workspaces.length === 0) {
+
+                        toast.info(
+                            "Create your workspace to continue."
+                        );
 
                         navigate("/create-workspace");
 
@@ -59,12 +69,13 @@ export default function LoginPage() {
 
                     }
 
+                    // One workspace per user
                     localStorage.setItem(
                         "workspace",
-                        JSON.stringify(workspaceResponse.data[0])
+                        JSON.stringify(workspaces[0])
                     );
 
-                    toast.success(res.message);
+                    toast.success("Welcome back!");
 
                     navigate("/app");
 
@@ -72,7 +83,9 @@ export default function LoginPage() {
 
                     console.error(err);
 
-                    toast.error("Unable to load workspace");
+                    toast.error(
+                        "Unable to load workspace"
+                    );
 
                 }
 

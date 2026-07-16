@@ -1,80 +1,71 @@
-import MainLayout from "@/components/layout/MainLayout";
-import NotificationCard from "@/components/notification/NotificationCard";
-import { useNotifications } from "@/hooks/useNotification";
+import { Button } from "@/components/ui/button";
+import { useMarkAsRead } from "@/hooks/useNotification";
 
-export default function NotificationPage() {
+export default function NotificationCard({ notification }) {
 
-    const { data, isLoading } = useNotifications();
+    const { mutate } = useMarkAsRead();
 
-    if (isLoading) {
+    function markRead() {
 
-        return (
-
-            <MainLayout>
-
-                <div className="text-xl">
-
-                    Loading Notifications...
-
-                </div>
-
-            </MainLayout>
-
-        );
+        mutate(notification.id);
 
     }
 
-    const notifications = data?.data || [];
-
     return (
 
-        <MainLayout>
+        <div
+            className={`rounded-2xl border p-6 ${
+                notification.read
+                    ? "border-[#262638] bg-[#171722]"
+                    : "border-violet-600 bg-[#1C1C2B]"
+            }`}
+        >
 
-            <h1 className="text-4xl font-bold">
+            <div className="flex justify-between items-start">
 
-                Notifications
+                <div>
 
-            </h1>
+                    <h2 className="text-xl font-bold">
 
-            <div className="space-y-5 mt-8">
+                        {notification.title}
+
+                    </h2>
+
+                    <p className="text-slate-400 mt-2">
+
+                        {notification.message}
+
+                    </p>
+
+                    <p className="text-xs text-slate-500 mt-4">
+
+                        {new Date(notification.createdAt).toLocaleString()}
+
+                    </p>
+
+                </div>
 
                 {
 
-                    notifications.length === 0 ?
+                    !notification.read &&
 
-                        (
+                    <Button
 
-                            <div className="rounded-3xl border border-dashed border-[#33334A] p-12 text-center text-slate-400">
+                        onClick={markRead}
 
-                                No Notifications Yet
+                        className="bg-violet-600"
 
-                            </div>
+                    >
 
-                        )
+                        Mark Read
 
-                        :
-
-                        (
-
-                            notifications.map(notification => (
-
-                                <NotificationCard
-
-                                    key={notification.id}
-
-                                    notification={notification}
-
-                                />
-
-                            ))
-
-                        )
+                    </Button>
 
                 }
 
             </div>
 
-        </MainLayout>
+        </div>
 
     );
 

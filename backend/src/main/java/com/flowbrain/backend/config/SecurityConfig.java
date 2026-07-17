@@ -71,7 +71,7 @@ public class SecurityConfig {
 
                 configuration.setAllowedOrigins(List.of(
                                 "http://localhost:5173",
-                                "https://YOUR_PROJECT.vercel.app"));
+                                "https://flowbrain-1.onrender.com"));
 
                 configuration.setAllowedMethods(List.of(
                                 "GET",
